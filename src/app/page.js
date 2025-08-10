@@ -43,7 +43,7 @@ const PortTable = () => {
       <Card sx={{ m: 2, p: 0, boxShadow: 2 }}>
         <TableContainer component={Paper}>
           <Table>
-            <TableHead sx={{ backgroundColor: "lightgray" }}>
+            <TableHead sx={{ backgroundColor: "#dee2e6" }}>
               <TableRow>
                 {HEADERS.map((header) => (
                   <TableCell key={header}>
@@ -65,7 +65,7 @@ const PortTable = () => {
                     sx={{
                       cursor: "pointer",
                       backgroundColor: isSelected
-                        ? "rgba(25, 118, 210, 0.15)"
+                        ? "rgba(25, 118, 210, 0.15) !important"
                         : "transparent",
                       transition: "background-color 0.3s ease",
                       "&:hover": {

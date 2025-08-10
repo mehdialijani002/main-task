@@ -216,6 +216,7 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "day",
       headerName: "Day",
+      headerClassName: "table-header-background",
       flex: 0.5,
       sortable: false,
       renderCell: (params) => {
@@ -228,6 +229,7 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "activityType",
       headerName: "Activity Type",
+      headerClassName: "table-header-background",
       flex: 1.3,
       sortable: false,
       renderCell: (params) => (
@@ -247,6 +249,7 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "fromDateTime",
       headerName: "From Date & Time",
+      headerClassName: "table-header-background",
       flex: 2.3,
       sortable: false,
       renderCell: (params) => (
@@ -269,6 +272,7 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "duration",
       headerName: "Duration",
+      headerClassName: "table-header-background",
       flex: 0.9,
       sortable: false,
       renderCell: (params) => {
@@ -280,6 +284,7 @@ export default function PortActivity({ selectedRow }) {
       field: "percentage",
       headerName: "%",
       flex: 1,
+      headerClassName: "table-header-background",
       sortable: false,
       renderCell: (params) => (
         <Select
@@ -300,6 +305,7 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "toDateTime",
       headerName: "To Date Time",
+      headerClassName: "table-header-background",
       flex: 1.6,
       sortable: false,
       renderCell: (params) => (
@@ -316,6 +322,8 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "remarks",
       headerName: "Remarks",
+      headerClassName: "table-header-background",
+
       flex: 3,
       sortable: false,
       renderCell: (params) => (
@@ -331,6 +339,8 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "deductions",
       headerName: "Deductions",
+      headerClassName: "table-header-background",
+
       flex: 1,
       sortable: false,
       renderCell: (params) => (
@@ -340,6 +350,8 @@ export default function PortActivity({ selectedRow }) {
     {
       field: "actions",
       headerName: "Actions",
+      headerClassName: "table-header-background",
+
       flex: 1,
       sortable: false,
       renderCell: (params) => {
@@ -438,11 +450,20 @@ export default function PortActivity({ selectedRow }) {
 
       <CardContent>
         {selectedRow !== null ? (
-          <Box sx={{ width: "100%", height: "50vh" }}>
+          <Box
+            sx={{
+              width: "100%",
+              height: "50vh",
+              "& .table-header-background": {
+                backgroundColor: "#dee2e6",
+              },
+            }}
+          >
             <DataGrid
               rows={derived}
               columns={columns}
               getRowId={(r) => r.id}
+              disableRowSelectionOnClick
               pageSize={6}
               rowsPerPageOptions={[6]}
               sx={{
