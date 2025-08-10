@@ -27,6 +27,17 @@ Clone the repository and install dependencies:
 
 ## Development Mode
 
+```bash
+npm run dev
+# or
+npm run build and npm run start for production mode
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
 ## Production Mode
 
 ```bash
@@ -41,15 +52,4 @@ pnpm start
 # or
 bun build
 bun start
-```
-
-```bash
-npm run dev
-# or
-npm run build and npm run start for production mode
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
