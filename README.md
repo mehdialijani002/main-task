@@ -23,7 +23,7 @@ This is a modern web application built with **Next.js v15** using the new **app 
 
 ## Installation
 
-Clone the repository and install dependencies:
+Clone or download the repository and install its dependencies:
 
 ## Production Mode
 
