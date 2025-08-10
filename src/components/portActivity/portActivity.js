@@ -144,7 +144,7 @@ export default function PortActivity({ selectedRow }) {
   const confirmDelete = () => {
     setRows((prev) => prev.filter((r) => r.id !== deleteDialog.rowId));
     setDeleteDialog({ open: false, rowId: null });
-    showMessage("Delete Succefully", "success");
+    showMessage("Deleted Successfully !", "success");
   };
   const closeDeleteDialog = () => setDeleteDialog({ open: false, rowId: null });
 
