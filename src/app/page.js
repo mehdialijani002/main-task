@@ -11,6 +11,7 @@ import {
   Paper,
   Typography,
   Card,
+  Box,
 } from "@mui/material";
 import { data } from "./data";
 import PortActivity from "@/components/portActivity/portActivity";
@@ -37,7 +38,7 @@ const PortTable = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   return (
-    <>
+    <Box>
       <Card sx={{ m: 2, p: 0, boxShadow: 2 }}>
         <TableContainer component={Paper}>
           <Table>
@@ -98,7 +99,7 @@ const PortTable = () => {
         </TableContainer>
       </Card>
       <PortActivity selectedRow={selectedRow} />
-    </>
+    </Box>
   );
 };
 

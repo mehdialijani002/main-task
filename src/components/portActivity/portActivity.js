@@ -27,7 +27,12 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import BuildIcon from "@mui/icons-material/Build";
-
+import { keyframes } from "@mui/system";
+const pulse = keyframes`
+  0% { backgroundColor: #ffa4a4ff; }
+  50% { backgroundColor: #ff6b6bff; }
+  100% { backgroundColor: #ffa4a4ff; }
+`;
 const activityTypes = [
   "Loading",
   "Unloading",
@@ -98,21 +103,12 @@ export default function PortActivity({ selectedRow }) {
     });
   }, [rows]);
 
-  // Add new row: new.from = last.to (keeps continuity). New row placed at end.
   const handleAddRow = () => {
     setRows((prev) => {
       const maxId = prev.length ? Math.max(...prev.map((r) => r.id)) : 0;
-      const last = prev[prev.length - 1];
-      const newFrom = last
-        ? prev.length > 1
-          ? prev[prev.length - 1].from
-          : prev[prev.length - 1].from
-        : dayjs();
-      // last.to is next-from; for last that's equal to last.from, so newFrom = last.to
-      const candidateFrom = prev.length ? prev[prev.length - 1].from : dayjs();
       const newRow = {
         id: maxId + 1,
-        from: candidateFrom,
+        from: dayjs(), // always set to *now*
         activityType: activityTypes[0],
         percentage: "100%",
         remarks: "",
@@ -377,15 +373,23 @@ export default function PortActivity({ selectedRow }) {
   ];
 
   return (
-    <Card sx={{ m: 2, p: 3, boxShadow: 3 }}>
+    <Card sx={{ m: 2, pt: 3, boxShadow: 3 }}>
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          px: 2,
         }}
       >
-        <Typography sx={{ borderLeft: "5px solid blue", pl: 1 }} variant="h6">
+        <Typography
+          sx={{
+            borderLeft: "5px solid blue",
+            pl: 1,
+            borderRadius: "5px 5px 5px 5px",
+          }}
+          variant="h6"
+        >
           Port Activity
         </Typography>
         <Button
@@ -401,20 +405,24 @@ export default function PortActivity({ selectedRow }) {
 
       <CardContent>
         {selectedRow !== null ? (
-          <Box sx={{ width: "100%" }}>
+          <Box sx={{ width: "100%", height: "50vh" }}>
             <DataGrid
               rows={derived}
               columns={columns}
               getRowId={(r) => r.id}
               pageSize={6}
               rowsPerPageOptions={[6]}
-              hideFooterPagination
-              pagination={false} // ensures pagination is disabled
+              // hideFooterPagination
+              // pagination={false}
               sx={{
                 border: "none",
+                "& .MuiDataGrid-virtualScroller": {
+                  overflowY: "scroll !important",
+                },
                 "& .MuiDataGrid-cell": { alignItems: "center" },
                 "& .row-out-of-order": {
-                  backgroundColor: "#ffecec !important",
+                  backgroundColor: "#ffa4a4ff !important",
+                  animation: `${pulse} 1.5s infinite`,
                 },
               }}
               getRowClassName={(params) =>
@@ -433,8 +441,11 @@ export default function PortActivity({ selectedRow }) {
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, rowId: null })}
+        maxWidth={"sm"}
+        fullWidth
+        disableScrollLock
       >
-        <DialogTitle>Sure to delete?</DialogTitle>
+        <DialogTitle>Sure to delete ?!</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Are you sure you want to delete this row?
@@ -447,7 +458,7 @@ export default function PortActivity({ selectedRow }) {
           >
             Cancel
           </Button>
-          <Button onClick={confirmDelete} color="error">
+          <Button onClick={confirmDelete} color="error" variant="contained">
             Ok
           </Button>
         </DialogActions>
