@@ -1,7 +1,7 @@
 export const data = [
   {
     port: "Kiel Canal",
-    flag: "🇩🇪",
+    flag: "https://flagcdn.com/w40/de.png", // Germany flag image URL
     cargo: "InTrans",
     f: "",
     blCode: "BLCode",
@@ -19,7 +19,7 @@ export const data = [
   },
   {
     port: "St Petersburg",
-    flag: "🇷🇺",
+    flag: "https://flagcdn.com/w40/ru.png", // Russia flag image URL
     cargo: "Commodities",
     f: "",
     blCode: "BLCode",
@@ -37,7 +37,7 @@ export const data = [
   },
   {
     port: "Hamburg",
-    flag: "🇩🇪",
+    flag: "https://flagcdn.com/w40/de.png", // Germany flag again
     cargo: "Project",
     f: "L",
     blCode: "BLCode",

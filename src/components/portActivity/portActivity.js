@@ -10,11 +10,6 @@ import {
   Typography,
   IconButton,
   Alert,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   MenuItem,
   Select,
   TextField,
@@ -27,12 +22,9 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import BuildIcon from "@mui/icons-material/Build";
-import { keyframes } from "@mui/system";
-const pulse = keyframes`
-  0% { backgroundColor: #ffa4a4ff; }
-  50% { backgroundColor: #ff6b6bff; }
-  100% { backgroundColor: #ffa4a4ff; }
-`;
+import ConfirmDialog from "@/components/ui/confirmDialog/confirmDialog";
+import SnackbarWithProgress from "@/components/ui/snackbar/snackBar";
+
 const activityTypes = [
   "Loading",
   "Unloading",
@@ -59,7 +51,6 @@ function fmtDurationFromMinutes(totalMin) {
 }
 
 export default function PortActivity({ selectedRow }) {
-  // initial single row
   const now = dayjs();
   const [firstCreatedId] = useState(1);
 
@@ -73,16 +64,41 @@ export default function PortActivity({ selectedRow }) {
       isOutOfOrder: false,
     },
   ]);
+  const showMessage = (message, severity = "error") => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     rowId: null,
   });
+  const [autoAdjustDialog, setAutoAdjustDialog] = useState({
+    open: false,
+    rowId: null,
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
+  const handleOpenAutoAdjust = (id) => {
+    setAutoAdjustDialog({ open: true, rowId: id });
+  };
+  const confirmAutoAdjust = () => {
+    if (autoAdjustDialog.rowId !== null) {
+      autoAdjustRow(autoAdjustDialog.rowId);
+    }
+    setAutoAdjustDialog({ open: false, rowId: null });
+    showMessage("Fixed succefully !", "success");
+  };
 
-  // Derived rows: compute `to`, `durationMin`, `deductionMin`, and formatted values for render
+  const cancelAutoAdjust = () => {
+    setAutoAdjustDialog({ open: false, rowId: null });
+  };
+
   const derived = useMemo(() => {
-    return rows.map((r, i) => {
-      const to = i < rows.length - 1 ? rows[i + 1].from : r.from; // to is next.from or same for last
+    const mapped = rows.map((r, i) => {
+      const to = i < rows.length - 1 ? rows[i + 1].from : r.from;
       const durationMin = Math.max(0, to.diff(r.from, "minute"));
       const percentNum = parseInt(r.percentage || "100");
       const deductionMin = Math.round((durationMin * percentNum) / 100);
@@ -101,6 +117,12 @@ export default function PortActivity({ selectedRow }) {
         deductionLabel: fmtDurationFromMinutes(deductionMin),
       };
     });
+
+    if (mapped.some((row) => row.isOutOfOrder)) {
+      showMessage("Some rows are out of range!", "warning");
+    }
+
+    return mapped;
   }, [rows]);
 
   const handleAddRow = () => {
@@ -108,7 +130,7 @@ export default function PortActivity({ selectedRow }) {
       const maxId = prev.length ? Math.max(...prev.map((r) => r.id)) : 0;
       const newRow = {
         id: maxId + 1,
-        from: dayjs(), // always set to *now*
+        from: dayjs(),
         activityType: activityTypes[0],
         percentage: "100%",
         remarks: "",
@@ -118,14 +140,14 @@ export default function PortActivity({ selectedRow }) {
     });
   };
 
-  // Delete (open confirm)
   const handleDeleteRow = (id) => setDeleteDialog({ open: true, rowId: id });
   const confirmDelete = () => {
     setRows((prev) => prev.filter((r) => r.id !== deleteDialog.rowId));
     setDeleteDialog({ open: false, rowId: null });
+    showMessage("Delete Succefully", "success");
   };
+  const closeDeleteDialog = () => setDeleteDialog({ open: false, rowId: null });
 
-  // Clone: insert clone immediately after the cloned row
   const handleClone = (id) => {
     setRows((prev) => {
       const idx = prev.findIndex((r) => r.id === id);
@@ -135,7 +157,6 @@ export default function PortActivity({ selectedRow }) {
       const clone = {
         ...original,
         id: maxId + 1,
-        // keep the same from/time as original — user can adjust later
         isOutOfOrder: false,
       };
       const newArr = [...prev.slice(0, idx + 1), clone, ...prev.slice(idx + 1)];
@@ -143,13 +164,11 @@ export default function PortActivity({ selectedRow }) {
     });
   };
 
-  // When user changes From DateTime
   const handleFromChange = (id, newFrom) => {
     setRows((prev) => {
       const updated = prev.map((r) =>
         r.id === id ? { ...r, from: newFrom } : r
       );
-      // detect if this row would move from current index to a different index when sorted
       const sorted = [...updated].sort((a, b) =>
         a.from.isBefore(b.from) ? -1 : 1
       );
@@ -161,21 +180,18 @@ export default function PortActivity({ selectedRow }) {
     });
   };
 
-  // Activity change
   const handleActivityChange = (id, value) => {
     setRows((prev) =>
       prev.map((r) => (r.id === id ? { ...r, activityType: value } : r))
     );
   };
 
-  // Percentage change
   const handlePercentageChange = (id, value) => {
     setRows((prev) =>
       prev.map((r) => (r.id === id ? { ...r, percentage: value } : r))
     );
   };
 
-  // Remarks change
   const handleRemarksChange = (id, value) => {
     setRows((prev) =>
       prev.map((r) =>
@@ -184,7 +200,6 @@ export default function PortActivity({ selectedRow }) {
     );
   };
 
-  // Auto adjust: move the target row to the correct sorted position (by from)
   const autoAdjustRow = (id) => {
     setRows((prev) => {
       const target = prev.find((r) => r.id === id);
@@ -193,12 +208,10 @@ export default function PortActivity({ selectedRow }) {
       const merged = [...others, target].sort((a, b) =>
         a.from.isBefore(b.from) ? -1 : 1
       );
-      // clear the out-of-order flag
       return merged.map((r) => ({ ...r, isOutOfOrder: false }));
     });
   };
 
-  const [editingRowId, setEditingRowId] = useState(null);
   const columns = [
     {
       field: "day",
@@ -330,7 +343,7 @@ export default function PortActivity({ selectedRow }) {
       flex: 1,
       sortable: false,
       renderCell: (params) => {
-        const isFirstCreated = params.row.id === firstCreatedId; // only the very first created row will have no Clone action
+        const isFirstCreated = params.row.id === firstCreatedId;
         return (
           <Box>
             <Tooltip title="Delete">
@@ -360,7 +373,7 @@ export default function PortActivity({ selectedRow }) {
                 <IconButton
                   color="warning"
                   size="small"
-                  onClick={() => autoAdjustRow(params.row.id)}
+                  onClick={() => handleOpenAutoAdjust(params.row.id)}
                 >
                   <BuildIcon fontSize="small" />
                 </IconButton>
@@ -374,6 +387,26 @@ export default function PortActivity({ selectedRow }) {
 
   return (
     <Card sx={{ m: 2, pt: 3, boxShadow: 3 }}>
+      <ConfirmDialog
+        open={deleteDialog.open}
+        title="Sure to delete?!"
+        message="Are you sure you want to delete this row?"
+        onCancel={closeDeleteDialog}
+        onConfirm={confirmDelete}
+        confirmText="Ok"
+        cancelText="Cancel"
+        confirmColor="error"
+      />
+      <ConfirmDialog
+        open={autoAdjustDialog.open}
+        title="Auto Adjust Row"
+        message="Do you want to move this row to the correct sorted position?"
+        onCancel={cancelAutoAdjust}
+        onConfirm={confirmAutoAdjust}
+        confirmText="Adjust"
+        cancelText="Cancel"
+        confirmColor="warning"
+      />
       <Box
         sx={{
           display: "flex",
@@ -384,9 +417,9 @@ export default function PortActivity({ selectedRow }) {
       >
         <Typography
           sx={{
-            borderLeft: "5px solid blue",
+            borderLeft: "5px solid #00b4d8",
             pl: 1,
-            borderRadius: "5px 5px 5px 5px",
+            borderRadius: "2px",
           }}
           variant="h6"
         >
@@ -412,8 +445,6 @@ export default function PortActivity({ selectedRow }) {
               getRowId={(r) => r.id}
               pageSize={6}
               rowsPerPageOptions={[6]}
-              // hideFooterPagination
-              // pagination={false}
               sx={{
                 border: "none",
                 "& .MuiDataGrid-virtualScroller": {
@@ -422,7 +453,6 @@ export default function PortActivity({ selectedRow }) {
                 "& .MuiDataGrid-cell": { alignItems: "center" },
                 "& .row-out-of-order": {
                   backgroundColor: "#ffa4a4ff !important",
-                  animation: `${pulse} 1.5s infinite`,
                 },
               }}
               getRowClassName={(params) =>
@@ -436,33 +466,12 @@ export default function PortActivity({ selectedRow }) {
           </Alert>
         )}
       </CardContent>
-
-      {/* Delete Confirmation */}
-      <Dialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, rowId: null })}
-        maxWidth={"sm"}
-        fullWidth
-        disableScrollLock
-      >
-        <DialogTitle>Sure to delete ?!</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this row?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setDeleteDialog({ open: false, rowId: null })}
-            color="inherit"
-          >
-            Cancel
-          </Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SnackbarWithProgress
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        setSnackbar={setSnackbar}
+      />
     </Card>
   );
 }

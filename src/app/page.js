@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { data } from "./data";
 import PortActivity from "@/components/portActivity/portActivity";
+import Image from "next/image";
 
 const HEADERS = [
   "Port Name",
@@ -74,8 +75,11 @@ const PortTable = () => {
                       },
                     }}
                   >
-                    <TableCell>
-                      {row.flag} {row.port}
+                    <TableCell
+                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                    >
+                      {row.port}{" "}
+                      <Image src={row.flag} width={20} height={15} alt="flag" />
                     </TableCell>
                     <TableCell>{row.cargo}</TableCell>
                     <TableCell>{row.f}</TableCell>
