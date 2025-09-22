@@ -1,0 +1,73 @@
+Acceptance criteria:
+*There is a table on the page that consisted of 9 columns. The columns are (from left to right):
+
+	**Day
+
+	**Activity Type
+
+	**From date & time
+
+	**Duration
+
+	**%
+
+	**To Date Time
+
+	**Remarks
+
+	**Deductions
+	
+	**Actions
+
+*The name of the table is “Port Activity” which is located on the top left side of the page
+
+*On the top right of the page, there is “Add New” button for adding new events.
+
+*By clicking on the “Add New” button, a new event’s row would be inserted in the table.
+
+*By default, the date and time of the first event is the moment we live in.
+
+*The “Activity Type” column has a drop-down that when expanded, shows 8 different values as(from top to bottom):
+
+**Loading
+
+**Unloading
+
+**Waiting
+
+**Berthing
+
+**Unberthing
+
+**Inspection
+
+**Bunkering
+
+**Maintenance
+
+*The “From Date & Time” column has a calendar that user can selects both date and time of the event’s starting.
+
+The “Duration” column’s value would be calculated by the value of “To Date & Time” column minus the value of “From Date & Time”
+
+The “%” column has a drop-down with three different values(from top to bottom):
+
+	**0%
+
+	**50%
+
+	**100% (Default)
+
+*The “Deduction” column’s value would be calculated the effectiveness impact of the “%” value on the “duration” value (e.g. duration= 22 hours and %=50 then the deduction value would be 11 hours)
+
+*The last column shows the actions. for the first generated row, we only have “Delete” action. for the next generated rows, we have both “Delete” and “Clone” actions.
+
+*By deleting a row, a pop-up would be shown that asks “Sure to delete?” and at the bottom left-side of the pop-up, the cancel button is located and on the bottom right-side of it, the “Ok” button is located.
+
+*By clicking on the “clone” action, a new row same as the previous one would be generated.
+
+*Note A:For the first row, when the event is generated, the “From Date & Time” value and the “To Date & Time” value are the same (until user change the “From Date & Time” value).
+*Note B: By default, the “From Date & Time” value of the next row is equals to the “To Date & Time” value of the previous row (users are able to change it).
+
+*Note C: Users can not change manually the “To Date & Time” value.
+
+*Note D: If users change the “From Date & Time” of a certain event which cased this event should be located between some prior events, before relocating this time-changed event, its row must be highlighted (by red color) and a new action’s icon would be appeared. By clicking this icon, asked users to adjust this event automatically and if users accept it, the event would be relocated on its right position based on the “From Date & Time’s” value. On the other hand, if users refused to accept the modal, the row remains red and icon would be existed until change the “From Date & Time’s” value manually or adjust it automatically through the new icon.
